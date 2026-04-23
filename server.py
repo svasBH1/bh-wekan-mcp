@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 import os
 import sys
@@ -280,6 +280,36 @@ def get_lists(board_id: str) -> list[dict]:
 
 
 @mcp.tool()
+def get_list_wip_limit(board_id: str, list_id: str) -> dict:
+    """Get the WIP (Work In Progress) limit settings for a list.
+
+    Returns: {"value": int, "enabled": bool, "soft": bool}
+
+    WIP limits control how many cards can be in a list. Read-only - MCP server
+    cannot modify WIP limits.
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    session = _build_session()
+    try:
+        list_data = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}")
+        if isinstance(list_data, dict):
+            wip = list_data.get("wipLimit") or {}
+            return {
+                "value": wip.get("value") or 0,
+                "enabled": wip.get("enabled") or False,
+                "soft": wip.get("soft") or False,
+            }
+        return {"value": 0, "enabled": False, "soft": False}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
 def get_cards(board_id: str, list_id: str) -> list[dict]:
     """Get all cards in a list."""
     _validate_id(board_id, "board_id")
@@ -314,10 +344,11 @@ def get_card(board_id: str, list_id: str, card_id: str) -> dict:
                 "description": card.get("description") or "",
                 "listId": card.get("listId") or list_id,
                 "swimlaneId": card.get("swimlaneId") or "",
-                "dueDate": card.get("dueDate") or "",
-                "startDate": card.get("startDate") or "",
+                "dueAt": card.get("dueAt") or "",
+                "startAt": card.get("startAt") or "",
                 "createdAt": card.get("createdAt") or "",
-                "assigneeId": card.get("assigneeId") or "",
+                "assignees": card.get("assignees") or [],
+                "members": card.get("members") or [],
                 "color": card.get("color") or "",
                 "labelIds": card.get("labelIds") or [],
                 "labels": card.get("labels") or [],
@@ -821,6 +852,169 @@ def set_card_color(board_id: str, list_id: str, card_id: str, color: str) -> dic
         return {"error": str(e)}
 
 
+@mcp.tool()
+def get_card_due_date(board_id: str, list_id: str, card_id: str) -> dict:
+    """Get the due date (dueAt) of a card."""
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    session = _build_session()
+    try:
+        card = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+        if isinstance(card, dict):
+            return {"dueAt": card.get("dueAt") or ""}
+        return {"dueAt": ""}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def set_card_due_date(board_id: str, list_id: str, card_id: str, due_at: str) -> dict:
+    """Set the due date of a card.
+
+    Args:
+        board_id: The board ID
+        list_id: The list ID
+        card_id: The card ID
+        due_at: ISO 8601 datetime string (e.g., "2026-05-01T17:00:00.000Z")
+               Use empty string to clear the due date.
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    session = _build_session()
+    try:
+        card = _http_put(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}",
+            json={"dueAt": due_at},
+        )
+        if isinstance(card, dict):
+            return {"id": card.get("_id"), "dueAt": card.get("dueAt") or ""}
+        return {"id": card_id, "dueAt": due_at}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def get_card_members(board_id: str, list_id: str, card_id: str) -> dict:
+    """Get user IDs of members (involved users) on a card."""
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    session = _build_session()
+    try:
+        card = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+        if isinstance(card, dict):
+            return {"members": card.get("members") or []}
+        return {"members": []}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def set_card_members(board_id: str, list_id: str, card_id: str, member_ids: list[str]) -> dict:
+    """Set members (involved users) on a card.
+
+    Args:
+        board_id: The board ID
+        list_id: The list ID
+        card_id: The card ID
+        member_ids: List of user IDs to set as members
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    if not isinstance(member_ids, list):
+        return {"error": "member_ids must be a list of user IDs"}
+    session = _build_session()
+    try:
+        card = _http_put(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}",
+            json={"members": member_ids},
+        )
+        if isinstance(card, dict):
+            return {"id": card.get("_id"), "members": card.get("members") or []}
+        return {"id": card_id, "members": member_ids}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def get_card_assignees(board_id: str, list_id: str, card_id: str) -> dict:
+    """Get user IDs of assignees on a card."""
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    session = _build_session()
+    try:
+        card = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+        if isinstance(card, dict):
+            return {"assignees": card.get("assignees") or []}
+        return {"assignees": []}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def set_card_assignees(board_id: str, list_id: str, card_id: str, assignee_ids: list[str]) -> dict:
+    """Set assignees on a card.
+
+    Note: Wekan API supports maximum 1 assignee. If more than 1 ID provided,
+    returns error. Use an empty list to clear assignees.
+
+    Args:
+        board_id: The board ID
+        list_id: The list ID
+        card_id: The card ID
+        assignee_ids: List of user IDs to set as assignees (max 1)
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(list_id, "list_id")
+    _validate_id(card_id, "card_id")
+    if not isinstance(assignee_ids, list):
+        return {"error": "assignee_ids must be a list of user IDs"}
+    if len(assignee_ids) > 1:
+        return {"error": "Wekan API supports maximum 1 assignee. Provided list has more than 1 ID."}
+    session = _build_session()
+    try:
+        card = _http_put(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/lists/{list_id}/cards/{card_id}",
+            json={"assignees": assignee_ids},
+        )
+        if isinstance(card, dict):
+            return {"id": card.get("_id"), "assignees": card.get("assignees") or []}
+        return {"id": card_id, "assignees": assignee_ids}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ---------------------------------------------------------------------------
 # Board label tools (v0.1.2)
 # ---------------------------------------------------------------------------
@@ -837,6 +1031,34 @@ def get_board_labels(board_id: str) -> list[dict]:
             return [
                 {"id": lb.get("_id"), "name": lb.get("name", ""), "color": lb.get("color", "")}
                 for lb in labels
+            ]
+        return []
+    except requests.exceptions.HTTPError as e:
+        return [{"error": f"HTTP {e.response.status_code}"}]
+    except requests.exceptions.ConnectionError as e:
+        return [{"error": f"Connection failed: {e}"}]
+    except Exception as e:
+        return [{"error": str(e)}]
+
+
+@mcp.tool()
+def get_board_users(board_id: str) -> list[dict]:
+    """Get all users on a board.
+
+    Use the returned user IDs with set_card_members or set_card_assignees.
+    """
+    _validate_id(board_id, "board_id")
+    session = _build_session()
+    try:
+        members = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/members")
+        if isinstance(members, list):
+            return [
+                {
+                    "id": m.get("_id"),
+                    "username": m.get("username") or "",
+                    "profile": m.get("profile") or {},
+                }
+                for m in members
             ]
         return []
     except requests.exceptions.HTTPError as e:
@@ -1056,6 +1278,27 @@ def delete_checklist_item(board_id: str, card_id: str, checklist_id: str, item_i
             session,
             f"{WEKAN_URL}/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}/items/{item_id}",
         )
+    except Exception:
+        return False
+
+
+@mcp.tool()
+def delete_checklist(board_id: str, card_id: str, checklist_id: str) -> bool:
+    """Delete a checklist from a card.
+
+    Note: Editing checklist titles is not supported by the Wekan API.
+    Delete and recreate the checklist manually if needed.
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(card_id, "card_id")
+    _validate_id(checklist_id, "checklist_id")
+    session = _build_session()
+    try:
+        _http_delete(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}",
+        )
+        return True
     except Exception:
         return False
 

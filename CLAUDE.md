@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.2.1
+- **Version:** 0.3.0
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -94,17 +94,24 @@ nano /opt/wekan-mcp/.env
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.2.1) |
+| `get_mcp_version` | — | Returns MCP server version (v0.3.0) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |
 | `list_boards` | — | Lists accessible boards |
 | `get_board` | `board_id` | Returns id, title, description, permission |
 | `get_lists` | `board_id` | Returns id, title, boardId per list |
+| `get_list_wip_limit` | `board_id`, `list_id` | Returns WIP limit `{value, enabled, soft}` (read-only) |
 | `get_cards` | `board_id`, `list_id` | Returns id, title, listId per card |
-| `get_card` | `board_id`, `list_id`, `card_id` | Returns full card details (description, labels, dates, color, labelIds) |
+| `get_card` | `board_id`, `list_id`, `card_id` | Returns full card details (description, labels, dates, color, labelIds, members, assignees) |
 | `get_card_color` | `board_id`, `list_id`, `card_id` | Returns card's current color |
 | `set_card_color` | `board_id`, `list_id`, `card_id`, `color` | Sets card color (validates against ALLOWED_COLORS) |
+| `get_card_due_date` | `board_id`, `list_id`, `card_id` | Returns card's `dueAt` |
+| `set_card_due_date` | `board_id`, `list_id`, `card_id`, `due_at` | Sets card due date (ISO 8601) |
+| `get_card_members` | `board_id`, `list_id`, `card_id` | Returns card's `members` array |
+| `set_card_members` | `board_id`, `list_id`, `card_id`, `member_ids`[] | Sets card members |
+| `get_card_assignees` | `board_id`, `list_id`, `card_id` | Returns card's `assignees` array (max 1) |
+| `set_card_assignees` | `board_id`, `list_id`, `card_id`, `assignee_ids`[] | Sets card assignees (max 1) |
 | `create_list` | `board_id`, `title` | POST to create list |
 | `add_card` | `board_id`, `list_id`, `title`, `description?`, `swimlane_id?` | Creates new card |
 | `update_card` | `board_id`, `list_id`, `card_id`, `title?`, `description?`, `color?` | Updates card (color added v0.1.2) |
@@ -120,6 +127,7 @@ nano /opt/wekan-mcp/.env
 | `add_checklist_item` | `board_id`, `card_id`, `checklist_id`, `text` | Adds item; uses `{"title": text}` per Wekan API |
 | `update_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id`, `is_finished?`, `title?` | Updates item completion state or title; at least one required |
 | `delete_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Deletes a checklist item |
+| `delete_checklist` | `board_id`, `card_id`, `checklist_id` | Deletes entire checklist |
 | `get_board_labels` | `board_id` | Returns board labels `[{id, name, color}]` |
 | `add_board_label` | `board_id`, `name`, `color` | Adds label to board via PUT |
 | `edit_board_label` | `board_id`, `label_id`, `name?`, `color?` | Edits label (read-modify-push) |
@@ -127,6 +135,7 @@ nano /opt/wekan-mcp/.env
 | `remove_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Removes label from card |
 | `get_custom_fields` | `board_id` | Returns id, name, type per field |
 | `set_custom_field` | `board_id`, `list_id`, `card_id`, `field_id`, `value` | Sets field value |
+| `get_board_users` | `board_id` | Returns all users on board `[{id, username, profile}]` |
 
 ---
 
@@ -170,6 +179,8 @@ nano /opt/wekan-mcp/.env
 | get_checklists returns empty items | **FIXED** v0.1.4 | Bulk endpoint returns empty; need to fetch each checklist individually |
 | get_comments returns null text | **FIXED** v0.1.4 | API returns field as `comment`, not `text` |
 | search_cards returns all cards | **FIXED** v0.1.4 | Wekan doesn't support ?query= param; now filters client-side |
+| Editing checklist titles not supported | **Wekan API limitation** | No PUT endpoint for checklist titles; must delete and recreate manually |
+| WIP limits are read-only | **Wekan API limitation** | No endpoint to set WIP limits; MCP only reads them |
 
 ### Activity Display Bug Details
 

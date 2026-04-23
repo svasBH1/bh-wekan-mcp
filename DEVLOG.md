@@ -4,6 +4,31 @@
 
 ## 2026-04-23
 
+### v0.3.0 — Due Dates, Members, Assignees, WIP Limits
+
+**New features:**
+
+- Added `delete_checklist(board_id, card_id, checklist_id)` - deletes entire checklist
+- Added `get_list_wip_limit(board_id, list_id)` - read-only WIP limit info `{value, enabled, soft}`
+- Added `get_card_due_date(board_id, list_id, card_id)` - returns `dueAt`
+- Added `set_card_due_date(board_id, list_id, card_id, due_at)` - sets `dueAt` (ISO 8601)
+- Added `get_card_members(board_id, list_id, card_id)` - returns `members` array
+- Added `set_card_members(board_id, list_id, card_id, member_ids)` - sets `members` array
+- Added `get_card_assignees(board_id, list_id, card_id)` - returns `assignees` array
+- Added `set_card_assignees(board_id, list_id, card_id, assignee_ids)` - sets `assignees` array (max 1)
+- Added `get_board_users(board_id)` - lists all users on a board (for discovering user IDs)
+
+**Fixes:**
+
+- Fixed `get_card` return fields: `dueAt` (was `dueDate`), `assignees` array (was `assigneeId`), added `members` array
+
+**Limitations documented:**
+
+- Editing checklist titles is not supported by Wekan API
+- WIP limits are read-only (cannot set via MCP)
+
+---
+
 ### v0.2.0 — Architecture Simplification
 
 Removed systemd service entirely — unnecessary for MCP stdio servers.

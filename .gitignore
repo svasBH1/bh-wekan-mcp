@@ -3,3 +3,4 @@ venv/
 __pycache__/
 *.pyc
 wekan-src/
+CODE_REVIEW.md
