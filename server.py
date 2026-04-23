@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 import os
 import sys
@@ -991,6 +991,70 @@ def remove_card_label(board_id: str, list_id: str, card_id: str, label_id: str) 
         return {"error": f"Connection failed: {e}"}
     except Exception as e:
         return {"error": str(e)}
+
+
+# ---------------------------------------------------------------------------
+# Checklist item tools (v0.1.5)
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def update_checklist_item(board_id: str, card_id: str, checklist_id: str, item_id: str, is_finished: Optional[bool] = None, title: str = "") -> dict:
+    """Update a checklist item's completion state or title.
+
+    Args:
+        board_id: The board ID
+        card_id: The card ID
+        checklist_id: The checklist ID
+        item_id: The item ID
+        is_finished: Set to True to check, False to uncheck (optional)
+        title: New title text (optional)
+    """
+    _validate_id(board_id, "board_id")
+    _validate_id(card_id, "card_id")
+    _validate_id(checklist_id, "checklist_id")
+    _validate_id(item_id, "item_id")
+    if is_finished is None and not title:
+        return {"error": "At least one of is_finished or title must be provided"}
+    if title:
+        _validate_nonempty(title, "title")
+    session = _build_session()
+    try:
+        payload = {}
+        if is_finished is not None:
+            payload["isFinished"] = is_finished
+        if title:
+            payload["title"] = title
+        result = _http_put(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}/items/{item_id}",
+            json=payload,
+        )
+        if isinstance(result, dict):
+            return {"id": result.get("_id"), "isFinished": is_finished, "title": title}
+        return {"id": item_id, "isFinished": is_finished, "title": title}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP {e.response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"Connection failed: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def delete_checklist_item(board_id: str, card_id: str, checklist_id: str, item_id: str) -> bool:
+    """Delete a checklist item."""
+    _validate_id(board_id, "board_id")
+    _validate_id(card_id, "card_id")
+    _validate_id(checklist_id, "checklist_id")
+    _validate_id(item_id, "item_id")
+    session = _build_session()
+    try:
+        return _http_delete(
+            session,
+            f"{WEKAN_URL}/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}/items/{item_id}",
+        )
+    except Exception:
+        return False
 
 
 if __name__ == "__main__":

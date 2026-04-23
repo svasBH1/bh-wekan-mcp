@@ -1,7 +1,7 @@
 # PLAN.md — Wekan MCP Server
 
 **Project:** `wekan-mcp` — Internal MCP server for Blockhouse IT Wekan integration
-**Version:** 0.1.4 (semver)
+**Version:** 0.1.5 (semver)
 **Owner:** Blockhouse Furniture — IT Department
 **Target Wekan:** v7.60.0
 **Wekan Instance:** `https://projects.blockhouse.com`
@@ -135,6 +135,10 @@ journalctl -u wekan-mcp -f
 - [x] `get_card()` — Now returns `color` and `labelIds`
 - [x] `update_card()` — Now accepts `color` parameter
 - [x] 23 unit tests + 6 live tests pass
+
+### Checklist Item Tools (v0.1.5)
+- [x] `update_checklist_item()` — Update item `isFinished` or `title` via PUT
+- [x] `delete_checklist_item()` — Delete item via DELETE
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.1.4
+- **Version:** 0.1.5
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -146,6 +146,8 @@ journalctl -u wekan-mcp -f        # watch logs
 | `get_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Returns single checklist item |
 | `add_checklist` | `board_id`, `card_id`, `title` | Creates checklist on card |
 | `add_checklist_item` | `board_id`, `card_id`, `checklist_id`, `text` | Adds item; uses `{"title": text}` per Wekan API |
+| `update_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id`, `is_finished?`, `title?` | Updates item completion state or title; at least one required |
+| `delete_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Deletes a checklist item |
 | `get_board_labels` | `board_id` | Returns board labels `[{id, name, color}]` |
 | `add_board_label` | `board_id`, `name`, `color` | Adds label to board via PUT |
 | `edit_board_label` | `board_id`, `label_id`, `name?`, `color?` | Edits label (read-modify-push) |
