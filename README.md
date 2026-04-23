@@ -17,18 +17,22 @@ This installs to `/opt/wekan-mcp`, creates a Python venv, and copies .env creden
 
 ## AI Agent Integration
 
-Add to your MCP client config:
+Add to your MCP client config (shown for OpenCode):
 
 ```json
 {
-  "mcp_servers": {
+  "mcp": {
     "wekan": {
-      "command": "python3",
-      "args": ["/opt/wekan-mcp/server.py"]
+      "type": "local",
+      "command": ["/opt/wekan-mcp/venv/bin/python", "/opt/wekan-mcp/server.py"],
+      "enabled": true,
+      "timeout": 30000
     }
   }
 }
 ```
+
+This goes in your `opencode.json` (or `opencode.jsonc`) config file.
 
 The server reads `.env` from its working directory (`/opt/wekan-mcp`). No env vars need to be passed explicitly.
 
