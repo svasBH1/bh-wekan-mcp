@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-04-23
+
+### v0.1.5 — Checklist Item Update/Delete Tools
+
+Added two new tools for checklist item management:
+
+- `update_checklist_item(board_id, card_id, checklist_id, item_id, is_finished?, title?)` — Update item `isFinished` (bool) or `title` (str) via PUT to `/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}/items/{item_id}`
+- `delete_checklist_item(board_id, card_id, checklist_id, item_id)` — Delete a checklist item via DELETE to the same endpoint
+
+**Live testing on "IT Brain Dump" board:**
+
+- Checked off items on "MCP Tool Test Checklist" and "MCP v0.1.3 Test Checklist" — SUCCESS
+- Added new checklist with 2 items, deleted both items — SUCCESS
+
+**Limitations discovered (NOT IMPLEMENTED):**
+
+- **No `update_checklist` tool** — Cannot rename a checklist title (only `update_checklist_item` updates items within a checklist, not the checklist itself)
+- **No `delete_checklist` tool** — Cannot delete a checklist (only `delete_checklist_item` deletes items within a checklist)
+- The checklist "MCP v0.1.5 Test Checklist" was left behind on the test card because it cannot be deleted via MCP
+
+**To implement in future version:**
+
+- `update_checklist(board_id, card_id, checklist_id, title)` — PUT to `/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}` with `{"title": title}`
+- `delete_checklist(board_id, card_id, checklist_id)` — DELETE to `/api/boards/{board_id}/cards/{card_id}/checklists/{checklist_id}`
+
+---
+
 ## 2026-04-22
 
 ### v0.1.4 — Checklist/Comment Reading Fixes

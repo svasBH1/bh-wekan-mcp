@@ -122,15 +122,30 @@ curl -I https://projects.blockhouse.com
 | `get_board` | `board_id` | Get board details |
 | `get_lists` | `board_id` | Get all lists in a board |
 | `get_cards` | `board_id`, `list_id` | Get all cards in a list |
+| `get_card` | `board_id`, `list_id`, `card_id` | Get full card details |
 | `add_card` | `board_id`, `list_id`, `title`, `description?` | Add a new card |
-| `update_card` | `board_id`, `list_id`, `card_id`, `title?`, `description?` | Update card |
+| `update_card` | `board_id`, `list_id`, `card_id`, `title?`, `description?`, `color?` | Update card |
 | `delete_card` | `board_id`, `list_id`, `card_id` | Delete a card |
+| `move_card` | `board_id`, `from_list_id`, `to_list_id`, `card_id`, `position?` | Move card |
 | `create_list` | `board_id`, `title` | Create a new list |
 | `search_cards` | `board_id`, `query` | Search cards by title/description |
+| `get_checklists` | `board_id`, `card_id` | Get checklists with items |
+| `get_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Get checklist item |
+| `add_checklist` | `board_id`, `card_id`, `title` | Add checklist to card |
+| `add_checklist_item` | `board_id`, `card_id`, `checklist_id`, `text` | Add item to checklist |
+| `update_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id`, `is_finished?`, `title?` | Update item |
+| `delete_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Delete item |
+| `get_comments` | `board_id`, `card_id` | Get comments on card |
+| `add_comment` | `board_id`, `card_id`, `text` | Add comment |
 | `get_custom_fields` | `board_id` | Get custom fields on board |
 | `set_custom_field` | `board_id`, `list_id`, `card_id`, `field_id`, `value` | Set custom field |
-| `get_comments` | `card_id` | Get comments on a card |
-| `add_comment` | `board_id`, `card_id`, `text` | Add a comment |
+| `get_allowed_colors` | — | Get 25 valid card colors |
+| `get_card_color` | `board_id`, `list_id`, `card_id` | Get card color |
+| `set_card_color` | `board_id`, `list_id`, `card_id`, `color` | Set card color |
+| `get_board_labels` | `board_id` | Get board labels |
+| `add_board_label` | `board_id`, `name`, `color` | Add label to board |
+| `add_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Add label to card |
+| `remove_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Remove label from card |
 
 ---
 
