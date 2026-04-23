@@ -1,7 +1,7 @@
 # PLAN.md — Wekan MCP Server
 
 **Project:** `wekan-mcp` — Internal MCP server for Blockhouse IT Wekan integration
-**Version:** 0.1.5 (semver)
+**Version:** 0.2.0 (semver)
 **Owner:** Blockhouse Furniture — IT Department
 **Target Wekan:** v7.60.0
 **Wekan Instance:** `https://projects.blockhouse.com`

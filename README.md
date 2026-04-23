@@ -8,11 +8,10 @@ interface with the Blockhouse IT project board via Model Context Protocol.
 ## Quick Install
 
 ```bash
-sudo bash install.sh
+bash install.sh
 ```
 
-This installs to `/opt/wekan-mcp`, creates a Python venv, and enables the
-`wekan-mcp` systemd service.
+This installs to `/opt/wekan-mcp` and creates a Python venv.
 
 ---
 
@@ -24,15 +23,8 @@ After `install.sh` completes:
 # 1. Edit credentials
 nano /opt/wekan-mcp/.env
 
-# 2. Verify credentials (optional but recommended)
-cd /opt/wekan-mcp
-python3 setup_wekan.py --validate
-
-# 3. Start the service
-sudo systemctl start wekan-mcp
-
-# 4. Verify it's running
-sudo systemctl status wekan-mcp
+# 2. Verify credentials
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/setup_wekan.py --validate
 ```
 
 ---
@@ -47,122 +39,91 @@ WEKAN_API_TOKEN=your_token_here
 WEKAN_USER_ID=your_user_id_here
 ```
 
-- `WEKAN_URL` — Wekan instance URL
 - `WEKAN_API_TOKEN` — Bearer token from `POST /users/login`
-- `WEKAN_USER_ID` — Service account user ID (required for card/comment authorship)
+- `WEKAN_USER_ID` — Service account user ID
 
 ### Generating Credentials
 
-For interactive token capture:
-
 ```bash
-cd /opt/wekan-mcp
-python3 setup_wekan.py
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/setup_wekan.py
 ```
 
 ---
 
-## Credential Rotation
+## Usage
 
-To refresh the API token:
+Configure your MCP client to run the server via stdio:
 
-```bash
-cd /opt/wekan-mcp
-python3 setup_wekan.py
+```
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/server.py
 ```
 
-Or validate current credentials without updating:
-
-```bash
-python3 setup_wekan.py --validate
-```
-
-After updating `.env`, restart the service:
-
-```bash
-sudo systemctl restart wekan-mcp
-```
+The MCP server uses stdio transport — it's spawned on-demand by the client and
+exits when the client disconnects. No systemd service or daemon required.
 
 ---
 
-## Service Management
+## Available Tools
 
-```bash
-sudo systemctl status wekan-mcp
-sudo systemctl restart wekan-mcp
-sudo systemctl stop wekan-mcp
-journalctl -u wekan-mcp -f
-```
-
-The service runs as the `wekan-mcp` system user (created by `install.sh`).
+| Tool | Description |
+|------|-------------|
+| `list_boards` | List all accessible boards |
+| `get_board` | Get board details |
+| `get_lists` | Get lists in a board |
+| `get_cards` | Get cards in a list |
+| `get_card` | Get full card details |
+| `add_card` | Create a new card |
+| `update_card` | Update card title/description/color |
+| `delete_card` | Delete a card |
+| `move_card` | Move card to another list |
+| `search_cards` | Search cards by query |
+| `get_comments` / `add_comment` | Manage card comments |
+| `get_checklists` / `add_checklist` | Manage checklists |
+| `get_card_color` / `set_card_color` | Manage card colors |
+| `get_board_labels` / `add_board_label` | Manage board labels |
+| `add_card_label` / `remove_card_label` | Manage card labels |
+| `get_custom_fields` / `set_custom_field` | Manage custom fields |
 
 ---
 
 ## Troubleshooting
 
-**Service fails to start** — check credentials:
+### Connection refused
+
+Verify credentials in `.env` and test:
+
 ```bash
-journalctl -u wekan-mcp -n 50
-python3 /opt/wekan-mcp/setup_wekan.py --validate
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/setup_wekan.py --validate
 ```
 
-**"Connection failed" errors** — verify `WEKAN_URL` is reachable from this machine:
-```bash
-curl -I https://projects.blockhouse.com
-```
+### Tool errors
+
+Check `.env` has valid `WEKAN_API_TOKEN` and `WEKAN_USER_ID`. Token must not be
+expired or revoked.
 
 ---
 
-## MCP Tools
+## Upgrade
 
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `test_connection` | — | Test connectivity to Wekan |
-| `list_boards` | — | List all accessible boards |
-| `get_board` | `board_id` | Get board details |
-| `get_lists` | `board_id` | Get all lists in a board |
-| `get_cards` | `board_id`, `list_id` | Get all cards in a list |
-| `get_card` | `board_id`, `list_id`, `card_id` | Get full card details |
-| `add_card` | `board_id`, `list_id`, `title`, `description?` | Add a new card |
-| `update_card` | `board_id`, `list_id`, `card_id`, `title?`, `description?`, `color?` | Update card |
-| `delete_card` | `board_id`, `list_id`, `card_id` | Delete a card |
-| `move_card` | `board_id`, `from_list_id`, `to_list_id`, `card_id`, `position?` | Move card |
-| `create_list` | `board_id`, `title` | Create a new list |
-| `search_cards` | `board_id`, `query` | Search cards by title/description |
-| `get_checklists` | `board_id`, `card_id` | Get checklists with items |
-| `get_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Get checklist item |
-| `add_checklist` | `board_id`, `card_id`, `title` | Add checklist to card |
-| `add_checklist_item` | `board_id`, `card_id`, `checklist_id`, `text` | Add item to checklist |
-| `update_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id`, `is_finished?`, `title?` | Update item |
-| `delete_checklist_item` | `board_id`, `card_id`, `checklist_id`, `item_id` | Delete item |
-| `get_comments` | `board_id`, `card_id` | Get comments on card |
-| `add_comment` | `board_id`, `card_id`, `text` | Add comment |
-| `get_custom_fields` | `board_id` | Get custom fields on board |
-| `set_custom_field` | `board_id`, `list_id`, `card_id`, `field_id`, `value` | Set custom field |
-| `get_allowed_colors` | — | Get 25 valid card colors |
-| `get_card_color` | `board_id`, `list_id`, `card_id` | Get card color |
-| `set_card_color` | `board_id`, `list_id`, `card_id`, `color` | Set card color |
-| `get_board_labels` | `board_id` | Get board labels |
-| `add_board_label` | `board_id`, `name`, `color` | Add label to board |
-| `add_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Add label to card |
-| `remove_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Remove label from card |
+```bash
+bash install.sh
+```
+
+The installer is idempotent — rerun to update files and requirements.
 
 ---
 
-## AI Agent Integration
+## Uninstall
 
-Add to your MCP client config:
-
-```json
-{
-  "mcp_servers": {
-    "wekan": {
-      "command": "python3",
-      "args": ["/opt/wekan-mcp/server.py"]
-    }
-  }
-}
+```bash
+sudo rm -rf /opt/wekan-mcp
 ```
 
-The server reads `.env` from its working directory (`/opt/wekan-mcp`). No env
-vars need to be passed explicitly.
+If you previously installed the systemd service:
+
+```bash
+sudo systemctl stop wekan-mcp
+sudo systemctl disable wekan-mcp
+sudo rm /etc/systemd/system/wekan-mcp.service
+sudo systemctl daemon-reload
+```

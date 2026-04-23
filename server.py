@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.1.5"
+__version__ = "0.2.0"
 
 import os
 import sys

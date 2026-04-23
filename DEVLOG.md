@@ -4,6 +4,34 @@
 
 ## 2026-04-23
 
+### v0.2.0 — Architecture Simplification
+
+Removed systemd service entirely — unnecessary for MCP stdio servers.
+
+**Problem discovered:**
+
+- systemd service was entering a restart loop (counter reached 584!)
+- Logs showed: service starts → immediately exits → systemd restarts → repeat
+- Root cause: MCP servers with stdio transport run **on-demand**, spawned by the MCP client
+- When no client is connected, the process exits — this is by design
+
+**Changes:**
+
+- Deleted `wekan-mcp.service` (systemd unit)
+- Simplified `install.sh` — removed service user creation, systemd installation, chown
+- No more root required for installation
+- MCP client spawns `server.py` directly via stdio
+
+**Lesson learned:**
+
+- MCP stdio servers are NOT long-running daemons — they run only while client is connected
+- systemd made sense for traditional REST APIs, but adds no value here
+- Should have recognized this mismatch earlier in design phase
+
+---
+
+## 2026-04-23
+
 ### v0.1.5 — Checklist Item Update/Delete Tools
 
 Added two new tools for checklist item management:

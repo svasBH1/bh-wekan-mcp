@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.1.5
+- **Version:** 0.2.0
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -39,8 +39,8 @@ Maintain and extend the Wekan MCP server that enables AI agents to interface wit
 - **Integration Layer:** MCP Python SDK (FastMCP) + `requests` (raw REST, no `python-wekan`).
 - **Wekan Instance:** `https://projects.blockhouse.com`
 - **Auth:** Bearer token via IT-BOT service account from `.env` (WEKAN_API_TOKEN, WEKAN_USER_ID).
-- **Deployment:** systemd service at `/opt/wekan-mcp` (created by `install.sh`).
-- **Service User:** `wekan-mcp` (system user, no login shell).
+- **Deployment:** Install to `/opt/wekan-mcp` (created by `install.sh`). Run by MCP client directly via stdio.
+- **No systemd required** — MCP servers using stdio run on-demand when the client connects.
 
 ### Wekan Source Code Reference
 
@@ -52,16 +52,14 @@ Cloned Wekan v7.60 source at `wekan-src/` for API inspection:
 ### Project Structure
 
 ```
-wekan-mcp-experimental/
+wekan-mcp/
 ├── server.py              # MCP server (FastMCP, stdio)
 ├── setup_wekan.py         # Interactive credential helper (--validate, --config)
-├── install.sh             # Root-only production installer
-├── wekan-mcp.service     # systemd unit file
-├── requirements.txt        # Pinned deps: mcp, python-dotenv, requests, urllib3
+├── install.sh             # Production installer
+├── requirements.txt       # Pinned deps: mcp, python-dotenv, requests, urllib3
 ├── .env.example          # Config template (NEVER commit .env)
 ├── .gitignore            # .env, venv/, __pycache__/, *.pyc, wekan-src/
-├── tests/test_validation.py  # Unit tests (input validation + config)
-├── tests/test_color_labels.py  # Unit + live tests for color/label/tools (v0.1.4)
+├── tests/                # Unit tests
 ├── README.md             # Production guide for end users
 ├── PLAN.md              # Project status, open issues
 ├── CLAUDE.md            # This file — dev context for AI agents
@@ -74,46 +72,20 @@ wekan-mcp-experimental/
 ## Operational Mandates
 
 ### Security
-- **NO HARDCODED SECRETS.** All credentials via `.env` (git-ignored).
-- **Startup validation** — `server.py` exits with `FATAL` if `WEKAN_API_TOKEN` is empty or placeholder.
-- **HTTPS only** for all API communication.
-- **systemd hardening** in `wekan-mcp.service`: `ProtectSystem=strict`, `PrivateTmp=true`, `NoNewPrivileges=true`, `ProtectHome=true`.
-
-### Code Standards
-- **Input validation** — all tool parameters validated by `_validate_id()` (alphanumeric regex) or `_validate_nonempty()` before any HTTP call.
-- **HTTP helpers** — `_http_get/put/post/delete()` use `raise_for_status()`. Never silently ignore non-2xx responses.
-- **Retry logic** — `_build_session()` mounts `HTTPAdapter` with `Retry(total=3, backoff_factor=0.5)` on status codes 429/500/502/503/504.
-- **Connection pooling** — every tool creates a fresh `Session` via `_build_session()`. Never use bare `requests.get()`.
-- **Consistent error format** — tools return `{"error": "..."}` on failure, never raw exceptions or inconsistent types.
-
-### Testing
-- Run: `python -m unittest discover tests -v`
-- Current coverage: input validation, env parsing, install placeholder detection, retry config.
-- Integration testing via Wekan MCP tools (connected to live instance).
-
-### Credential Management
-```bash
-# Interactive capture
-python3 setup_wekan.py
-
-# Validate current .env
-python3 setup_wekan.py --validate
-
-# Specify config path
-python3 setup_wekan.py --validate --config /opt/wekan-mcp/.env
-```
-
 ### Deployment
 ```bash
-# Install (root)
-sudo bash install.sh
+# Install
+bash install.sh
 
-# Post-install
+# Setup credentials
 nano /opt/wekan-mcp/.env
-python3 /opt/wekan-mcp/setup_wekan.py --validate
-sudo systemctl start wekan-mcp
-sudo systemctl status wekan-mcp
-journalctl -u wekan-mcp -f        # watch logs
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/setup_wekan.py --validate
+```
+
+**Usage:** Configure your MCP client to run the server via stdio:
+```
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/server.py
+```
 ```
 
 ---
@@ -122,7 +94,7 @@ journalctl -u wekan-mcp -f        # watch logs
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.1.4) |
+| `get_mcp_version` | — | Returns MCP server version (v0.2.0) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |
