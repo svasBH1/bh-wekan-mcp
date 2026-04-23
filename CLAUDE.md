@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.2.0
+- **Version:** 0.2.1
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -21,7 +21,7 @@ When making code changes (fixes, features, etc.):
    - `server.py` — `__version__` variable
    - `CLAUDE.md` — Project Info header
    - `PLAN.md` — Project header
-   - `TODO.md` — Version line
+   - `DEVLOG.md` — Version line
    - Any test documentation cards in Wekan
 
 **Patch releases (bug fixes):** Increment PATCH (0.0.X)
@@ -63,7 +63,7 @@ wekan-mcp/
 ├── README.md             # Production guide for end users
 ├── PLAN.md              # Project status, open issues
 ├── CLAUDE.md            # This file — dev context for AI agents
-├── TODO.md             # Active tasks
+├── DEVLOG.md           # Development log
 └── wekan-src/         # Cloned Wekan v7.60 source (reference only)
 ```
 
@@ -94,7 +94,7 @@ nano /opt/wekan-mcp/.env
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.2.0) |
+| `get_mcp_version` | — | Returns MCP server version (v0.2.1) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |
@@ -190,7 +190,7 @@ Workaround: This is a Wekan upstream bug. The MCP server works correctly - the d
 ## When Modifying server.py
 
 1. **Bump version on ANY code change** — See "Semantic Versioning" section above for rules.
-2. Update version in: `server.py`, `CLAUDE.md`, `PLAN.md`, `TODO.md`
+2. Update version in: `server.py`, `CLAUDE.md`, `PLAN.md`, `DEVLOG.md`
 3. **Always use the HTTP helpers** (`_http_get`, `_http_post`, etc.) — never bare `requests`.
 4. **Always validate inputs** with `_validate_id()` or `_validate_nonempty()` before HTTP calls.
 5. **Always catch `HTTPError` and `ConnectionError`** explicitly, then `Exception` as fallback.

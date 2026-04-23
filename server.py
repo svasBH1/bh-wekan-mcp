@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import os
 import sys
@@ -600,7 +600,10 @@ def move_card(board_id: str, from_list_id: str, to_list_id: str, card_id: str, p
     _validate_id(card_id, "card_id")
     session = _build_session()
     
-    sort_value = -999999 if position == "top" else (999999 if position == "bottom" else int(position) if position.isdigit() else 0)
+    try:
+        sort_value = -999999 if position == "top" else (999999 if position == "bottom" else int(position))
+    except ValueError:
+        sort_value = 0
     
     try:
         card = _http_put(

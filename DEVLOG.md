@@ -32,6 +32,19 @@ Removed systemd service entirely — unnecessary for MCP stdio servers.
 
 ## 2026-04-23
 
+### v0.2.1 — Bug Fixes
+
+**Fixes:**
+
+- Fixed `move_card` position parsing bug: negative numbers like `-5` now work correctly (previously `isdigit()` returned `False` for negatives, defaulting to `0`)
+- Updated CLAUDE.md to remove stale TODO.md reference (DEVLOG.md is used instead)
+- Fixed PLAN.md deployment documentation (removed systemd references, service file was deleted in v0.2.0)
+- Bumped version to 0.2.1
+
+---
+
+## 2026-04-23
+
 ### v0.1.5 — Checklist Item Update/Delete Tools
 
 Added two new tools for checklist item management:

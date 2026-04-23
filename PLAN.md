@@ -1,7 +1,7 @@
 # PLAN.md — Wekan MCP Server
 
 **Project:** `wekan-mcp` — Internal MCP server for Blockhouse IT Wekan integration
-**Version:** 0.2.0 (semver)
+**Version:** 0.2.1 (semver)
 **Owner:** Blockhouse Furniture — IT Department
 **Target Wekan:** v7.60.0
 **Wekan Instance:** `https://projects.blockhouse.com`
@@ -27,7 +27,7 @@ AI Agent (OpenCode/Gemini)
 - **MCP SDK:** MCP Python SDK (FastMCP)
 - **Auth:** Bearer token via IT-BOT service account
 - **Config:** `.env` file
-- **Deployment:** systemd service at `/opt/wekan-mcp`
+- **Deployment:** MCP stdio server (no systemd required)
 
 ---
 
@@ -42,11 +42,10 @@ wekan-mcp-experimental/
 ├── server.py           # MCP server (stdio)
 ├── setup_wekan.py      # Interactive credential helper
 ├── install.sh         # Root-only production installer
-├── wekan-mcp.service  # systemd unit file
 ├── README.md           # Production guide
 ├── CLAUDE.md          # Dev context
 ├── PLAN.md           # This file
-├── TODO.md
+├── DEVLOG.md         # Development log
 └── wekan-src/        # Cloned Wekan v7.60 source (reference only)
 ```
 
@@ -54,22 +53,20 @@ wekan-mcp-experimental/
 
 ## Deployment
 
-### Install (root)
+### Install
 ```bash
-sudo bash install.sh
+bash install.sh
 ```
 
 ### Credential Rotation
 ```bash
 cd /opt/wekan-mcp
-python3 setup_wekan.py
+python3 setup_wekan.py --validate
 ```
 
-### Service Management
-```bash
-systemctl status wekan-mcp
-systemctl restart wekan-mcp
-journalctl -u wekan-mcp -f
+**Usage:** Configure your MCP client to run the server via stdio:
+```
+/opt/wekan-mcp/venv/bin/python /opt/wekan-mcp/server.py
 ```
 
 ### AI Agent Config
@@ -90,8 +87,7 @@ journalctl -u wekan-mcp -f
 
 ### Core Infrastructure (v0.1.0)
 - [x] `setup_wekan.py` — Interactive credential helper with `--validate`
-- [x] `install.sh` — Root-only production installer (systemd)
-- [x] `wekan-mcp.service` — systemd unit file
+- [x] `install.sh` — Root-only production installer
 - [x] `.gitignore` created (`.env`, `venv/`, `__pycache__/`, `wekan-src/`)
 
 ### MCP Tools

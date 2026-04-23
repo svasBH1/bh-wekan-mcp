@@ -15,24 +15,32 @@ This installs to `/opt/wekan-mcp`, creates a Python venv, and copies .env creden
 
 ---
 
-## Post-Install Steps
+## AI Agent Integration
 
-After `install.sh` completes:
+Add to your MCP client config:
 
-```bash
-# 1. Edit credentials
-nano /opt/wekan-mcp/.env
-
-# 2. Verify credentials (optional but recommended)
-cd /opt/wekan-mcp
-python3 setup_wekan.py --validate
+```json
+{
+  "mcp_servers": {
+    "wekan": {
+      "command": "python3",
+      "args": ["/opt/wekan-mcp/server.py"]
+    }
+  }
+}
 ```
+
+The server reads `.env` from its working directory (`/opt/wekan-mcp`). No env vars need to be passed explicitly.
 
 ---
 
 ## Configuration
 
-Edit `/opt/wekan-mcp/.env`:
+After `install.sh` completes, edit credentials:
+
+```bash
+nano /opt/wekan-mcp/.env
+```
 
 ```
 WEKAN_URL=https://projects.blockhouse.com
@@ -53,30 +61,11 @@ cd /opt/wekan-mcp
 python3 setup_wekan.py
 ```
 
----
-
-## Credential Rotation
-
-To refresh the API token:
+### Verify Credentials
 
 ```bash
 cd /opt/wekan-mcp
-python3 setup_wekan.py
-```
-
-Or validate current credentials without updating:
-
-```bash
 python3 setup_wekan.py --validate
-```
-
----
-
-## Troubleshooting
-
-**"Connection failed" errors** — verify `WEKAN_URL` is reachable from this machine:
-```bash
-curl -I https://projects.blockhouse.com
 ```
 
 ---
@@ -117,20 +106,10 @@ curl -I https://projects.blockhouse.com
 
 ---
 
-## AI Agent Integration
+## Troubleshooting
 
-Add to your MCP client config:
+**"Connection failed" errors** — verify `WEKAN_URL` is reachable from this machine:
 
-```json
-{
-  "mcp_servers": {
-    "wekan": {
-      "command": "python3",
-      "args": ["/opt/wekan-mcp/server.py"]
-    }
-  }
-}
+```bash
+curl -I https://projects.blockhouse.com
 ```
-
-The server reads `.env` from its working directory (`/opt/wekan-mcp`). No env
-vars need to be passed explicitly.
