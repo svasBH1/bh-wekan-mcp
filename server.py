@@ -1064,7 +1064,7 @@ def get_board_users(board_id: str) -> list[dict]:
             user_data = _http_get(session, f"{WEKAN_URL}/api/users/{user_id}")
             username = ""
             profile = {}
-            if isinstance(user_data, dict):
+            if isinstance(user_data, dict) and not user_data.get("error"):
                 username = user_data.get("username") or ""
                 profile = user_data.get("profile") or {}
             result.append({
