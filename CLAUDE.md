@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.3.0
+- **Version:** 0.3.1
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -94,7 +94,7 @@ nano /opt/wekan-mcp/.env
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.3.0) |
+| `get_mcp_version` | — | Returns MCP server version (v0.3.1) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |

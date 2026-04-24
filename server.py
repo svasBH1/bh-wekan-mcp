@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 import os
 import sys
@@ -1050,17 +1050,34 @@ def get_board_users(board_id: str) -> list[dict]:
     _validate_id(board_id, "board_id")
     session = _build_session()
     try:
-        members = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}/members")
-        if isinstance(members, list):
-            return [
-                {
-                    "id": m.get("_id"),
-                    "username": m.get("username") or "",
-                    "profile": m.get("profile") or {},
-                }
-                for m in members
-            ]
-        return []
+        board = _http_get(session, f"{WEKAN_URL}/api/boards/{board_id}")
+        if not isinstance(board, dict):
+            return []
+        board_members = board.get("members") or []
+        if not board_members:
+            return []
+        result = []
+        for m in board_members:
+            user_id = m.get("userId")
+            if not user_id:
+                continue
+            user_data = _http_get(session, f"{WEKAN_URL}/api/users/{user_id}")
+            username = ""
+            profile = {}
+            if isinstance(user_data, dict):
+                username = user_data.get("username") or ""
+                profile = user_data.get("profile") or {}
+            result.append({
+                "id": user_id,
+                "username": username,
+                "profile": profile,
+                "isAdmin": m.get("isAdmin", False),
+                "isActive": m.get("isActive", False),
+                "isNoComments": m.get("isNoComments", False),
+                "isCommentOnly": m.get("isCommentOnly", False),
+                "isWorker": m.get("isWorker", False),
+            })
+        return result
     except requests.exceptions.HTTPError as e:
         return [{"error": f"HTTP {e.response.status_code}"}]
     except requests.exceptions.ConnectionError as e:

@@ -2,6 +2,16 @@
 
 ---
 
+## 2026-04-24
+
+### v0.3.1 — Fix get_board_users API endpoint
+
+**Fixes:**
+
+- Fixed `get_board_users(board_id)` — was calling non-existent `GET /api/boards/{board_id}/members` endpoint; now correctly fetches board data via `GET /api/boards/{board_id}` to get `members` array, then resolves each user's username via `GET /api/users/{userId}`. Returns full board membership context: `{id, username, profile, isAdmin, isActive, isNoComments, isCommentOnly, isWorker}`
+
+---
+
 ## 2026-04-23
 
 ### v0.3.0 — Due Dates, Members, Assignees, WIP Limits
