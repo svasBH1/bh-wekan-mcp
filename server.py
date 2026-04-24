@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 import os
 import sys
@@ -1063,18 +1063,13 @@ def get_board_users(board_id: str) -> list[dict]:
                 continue
             user_data = _http_get(session, f"{WEKAN_URL}/api/users/{user_id}")
             username = ""
-            profile = {}
             if isinstance(user_data, dict) and not user_data.get("error"):
                 username = user_data.get("username") or ""
-                profile = user_data.get("profile") or {}
             result.append({
                 "id": user_id,
                 "username": username,
-                "profile": profile,
                 "isAdmin": m.get("isAdmin", False),
                 "isActive": m.get("isActive", False),
-                "isNoComments": m.get("isNoComments", False),
-                "isCommentOnly": m.get("isCommentOnly", False),
                 "isWorker": m.get("isWorker", False),
             })
         return result

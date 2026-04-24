@@ -2,7 +2,7 @@
 
 ## Project Info
 
-- **Version:** 0.3.1
+- **Version:** 0.3.2
 - **Owner:** Blockhouse Furniture — IT Department
 - **Target Wekan:** v7.60.0 (stability lock)
 - **Status:** Active development
@@ -94,7 +94,7 @@ nano /opt/wekan-mcp/.env
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.3.1) |
+| `get_mcp_version` | — | Returns MCP server version (v0.3.2) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |
@@ -135,7 +135,7 @@ nano /opt/wekan-mcp/.env
 | `remove_card_label` | `board_id`, `list_id`, `card_id`, `label_id` | Removes label from card |
 | `get_custom_fields` | `board_id` | Returns id, name, type per field |
 | `set_custom_field` | `board_id`, `list_id`, `card_id`, `field_id`, `value` | Sets field value |
-| `get_board_users` | `board_id` | Returns all users on board `[{id, username, profile}]` |
+| `get_board_users` | `board_id` | Returns all users on board `[{id, username, isAdmin, isActive, isWorker}]` |
 
 ---
 

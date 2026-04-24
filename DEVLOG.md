@@ -4,6 +4,16 @@
 
 ## 2026-04-24
 
+### v0.3.2 — Simplify get_board_users output
+
+**Fixes:**
+
+- Simplified `get_board_users(board_id)` — removed nested `profile` object and rarely-used permission flags (`isNoComments`, `isCommentOnly`). Now returns flat fields for easier AI consumption: `{id, username, isAdmin, isActive, isWorker}`
+
+---
+
+## 2026-04-24
+
 ### v0.3.1 — Fix get_board_users API endpoint
 
 **Fixes:**
