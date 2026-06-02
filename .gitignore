@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 wekan-src/
 CODE_REVIEW.md
+PLAN.md
+DEVLOG.md
+docs/RESEARCH_API_AND_PYTHON.md
+docs/WEKAN-REST-API-v7.60.0.md

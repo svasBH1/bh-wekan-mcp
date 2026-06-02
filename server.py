@@ -2,7 +2,7 @@
 Wekan MCP Server
 Model Context Protocol server for Wekan
 """
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 import os
 import sys
@@ -20,7 +20,7 @@ from mcp.server.fastmcp import FastMCP
 
 load_dotenv()
 
-WEKAN_URL = os.getenv("WEKAN_URL", "https://projects.blockhouse.com")
+WEKAN_URL = os.getenv("WEKAN_URL", "https://wekan.example.com")
 API_TOKEN = os.getenv("WEKAN_API_TOKEN", "")
 USER_ID = os.getenv("WEKAN_USER_ID", "")
 WEKAN_VERSION = os.getenv("WEKAN_VERSION", "7.60.0")

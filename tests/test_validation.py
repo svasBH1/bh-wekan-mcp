@@ -112,7 +112,7 @@ class TestInstallScript(unittest.TestCase):
     def test_placeholder_detection(self):
         """The grep check in install.sh should catch placeholder values."""
         env_content = """# Wekan MCP Configuration
-WEKAN_URL=https://projects.blockhouse.com
+WEKAN_URL=https://wekan.example.com
 WEKAN_API_TOKEN=your_token_here
 WEKAN_USER_ID=your_user_id_here
 """
@@ -121,7 +121,7 @@ WEKAN_USER_ID=your_user_id_here
 
     def test_valid_env_no_placeholder(self):
         env_content = """# Wekan MCP Configuration
-WEKAN_URL=https://projects.blockhouse.com
+WEKAN_URL=https://wekan.example.com
 WEKAN_API_TOKEN=abc123real_token
 WEKAN_USER_ID=xyz456real_id
 """
@@ -155,7 +155,7 @@ class TestSetupWekanValidate(unittest.TestCase):
 
     def test_env_parsing_missing_fields(self):
         """Validate should detect missing fields in .env."""
-        env_content = """WEKAN_URL=https://projects.blockhouse.com
+        env_content = """WEKAN_URL=https://wekan.example.com
 WEKAN_API_TOKEN=abc123
 """
         env = {}
@@ -175,7 +175,7 @@ WEKAN_API_TOKEN=abc123
         self.assertEqual(["WEKAN_USER_ID"], missing)
 
     def test_env_parsing_all_fields_present(self):
-        env_content = """WEKAN_URL=https://projects.blockhouse.com
+        env_content = """WEKAN_URL=https://wekan.example.com
 WEKAN_API_TOKEN=abc123
 WEKAN_USER_ID=xyz456
 """
@@ -188,7 +188,7 @@ WEKAN_USER_ID=xyz456
                 key, value = line.split("=", 1)
                 env[key.strip()] = value.strip()
 
-        self.assertEqual(env["WEKAN_URL"], "https://projects.blockhouse.com")
+        self.assertEqual(env["WEKAN_URL"], "https://wekan.example.com")
         self.assertEqual(env["WEKAN_API_TOKEN"], "abc123")
         self.assertEqual(env["WEKAN_USER_ID"], "xyz456")
 

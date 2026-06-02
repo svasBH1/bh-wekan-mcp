@@ -1,7 +1,7 @@
 # Wekan MCP Server
 
-Internal MCP server for Blockhouse IT Wekan integration. Enables AI agents to
-interface with the Blockhouse IT project board via Model Context Protocol.
+MCP server for Wekan integration. Enables AI agents to interface with
+Wekan project boards via Model Context Protocol.
 
 ---
 
@@ -47,7 +47,7 @@ nano /opt/wekan-mcp/.env
 ```
 
 ```
-WEKAN_URL=https://projects.blockhouse.com
+WEKAN_URL=https://wekan.example.com
 WEKAN_API_TOKEN=your_token_here
 WEKAN_USER_ID=your_user_id_here
 ```
@@ -115,5 +115,5 @@ python3 setup_wekan.py --validate
 **"Connection failed" errors** — verify `WEKAN_URL` is reachable from this machine:
 
 ```bash
-curl -I https://projects.blockhouse.com
+curl -I https://wekan.example.com
 ```

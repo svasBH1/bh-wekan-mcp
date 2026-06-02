@@ -2,9 +2,8 @@
 
 ## Project Info
 
-- **Version:** 0.3.2
-- **Owner:** Blockhouse Furniture — IT Department
-- **Target Wekan:** v7.60.0 (stability lock)
+- **Version:** 0.3.3
+- **Target Wekan:** v7.60.0 (developed and tested against this version; other Wekan versions may have API differences)
 - **Status:** Active development
 
 ## Semantic Versioning
@@ -17,12 +16,12 @@ We use [Semantic Versioning](https://semver.org/) (semver) to determine version 
 When making code changes (fixes, features, etc.):
 1. Bump `__version__` in `server.py` (line 5)
 2. Update ALL markdown docs: `grep -r "Version:.*x.y.z" --include="*.md"` 
-3. Files requiring version update:
+3. **Required version updates:**
    - `server.py` — `__version__` variable
    - `CLAUDE.md` — Project Info header
+4. **Optional (if you maintain these locally):**
    - `PLAN.md` — Project header
    - `DEVLOG.md` — Version line
-   - Any test documentation cards in Wekan
 
 **Patch releases (bug fixes):** Increment PATCH (0.0.X)
 **Minor releases (new features):** Increment MINOR and reset PATCH to 0
@@ -30,41 +29,49 @@ When making code changes (fixes, features, etc.):
 
 ## The Mission
 
-Maintain and extend the Wekan MCP server that enables AI agents to interface with Blockhouse IT's Wekan project board via Model Context Protocol.
+Maintain and extend the Wekan MCP server that enables AI agents to interface with Wekan project boards via Model Context Protocol.
 
 ---
 
 ## Architecture & Infrastructure
 
 - **Integration Layer:** MCP Python SDK (FastMCP) + `requests` (raw REST, no `python-wekan`).
-- **Wekan Instance:** `https://projects.blockhouse.com`
-- **Auth:** Bearer token via IT-BOT service account from `.env` (WEKAN_API_TOKEN, WEKAN_USER_ID).
+- **Wekan Instance:** Configured via `WEKAN_URL` in `.env` (defaults to `https://wekan.example.com`)
+- **Auth:** Bearer token via service account from `.env` (WEKAN_API_TOKEN, WEKAN_USER_ID).
 - **Deployment:** Install to `/opt/wekan-mcp` (created by `install.sh`). Run by MCP client directly via stdio.
 - **No systemd required** — MCP servers using stdio run on-demand when the client connects.
 
-### Wekan Source Code Reference
+### Wekan Source Code Reference (Optional)
 
-Cloned Wekan v7.60 source at `wekan-src/` for API inspection:
+This MCP server was developed and tested against **Wekan v7.60.0**. The API quirks documented below were discovered against this specific version; other Wekan versions may behave differently.
+
+To inspect the Wekan v7.60.0 source for local development:
+```bash
+git clone --branch v7.60.0 https://github.com/wekan/wekan.git wekan-src
+```
+
+Useful files for understanding API contracts:
 - `wekan-src/models/checklistItems.js` — Checklist item endpoints
 - `wekan-src/public/api/wekan.yml` — API specification
-- Use this to verify expected request/response formats when debugging API issues.
+- Use these to verify expected request/response formats when debugging API issues.
+
+`wekan-src/` is gitignored — clone it locally only if you need it for development.
 
 ### Project Structure
 
 ```
-wekan-mcp/
+bh-wekan-mcp/
 ├── server.py              # MCP server (FastMCP, stdio)
 ├── setup_wekan.py         # Interactive credential helper (--validate, --config)
 ├── install.sh             # Production installer
 ├── requirements.txt       # Pinned deps: mcp, python-dotenv, requests, urllib3
 ├── .env.example          # Config template (NEVER commit .env)
-├── .gitignore            # .env, venv/, __pycache__/, *.pyc, wekan-src/
+├── .gitignore            # .env, venv/, __pycache__/, *.pyc, wekan-src/, dev-only planning files
 ├── tests/                # Unit tests
+├── docs/                 # Additional documentation
 ├── README.md             # Production guide for end users
-├── PLAN.md              # Project status, open issues
 ├── CLAUDE.md            # This file — dev context for AI agents
-├── DEVLOG.md           # Development log
-└── wekan-src/         # Cloned Wekan v7.60 source (reference only)
+└── wekan-src/           # Optional: cloned Wekan v7.60.0 source for local dev (gitignored)
 ```
 
 ---
@@ -72,6 +79,13 @@ wekan-mcp/
 ## Operational Mandates
 
 ### Security
+
+- **Never commit `.env`** — it contains your Wekan API token. The `.gitignore` excludes it by default.
+- **Use a dedicated service account** — create a separate Wekan user for the MCP server with only the permissions it needs.
+- **Use HTTPS** — never point `WEKAN_URL` at an HTTP endpoint; the login endpoint sends credentials in plaintext.
+- **Rotate tokens if exposed** — re-issue via `POST /users/login` in Wekan, then update `.env`.
+- **Restrict `.env` permissions** — `chmod 600 .env` so only the owner can read it.
+
 ### Deployment
 ```bash
 # Install
@@ -94,7 +108,7 @@ nano /opt/wekan-mcp/.env
 
 | Tool | Parameters | Notes |
 |------|------------|-------|
-| `get_mcp_version` | — | Returns MCP server version (v0.3.2) |
+| `get_mcp_version` | — | Returns MCP server version (v0.3.3) |
 | `get_wekan_version` | — | Returns Wekan version (scrapes /information or falls back to WEKAN_VERSION env) |
 | `get_allowed_colors` | — | Returns 25 valid card colors (Wekan v7.60.0 ALLOWED_COLORS) |
 | `test_connection` | — | Tests Wekan connectivity |
@@ -185,13 +199,11 @@ nano /opt/wekan-mcp/.env
 ### Activity Display Bug Details
 
 When MCP server actions are performed (move_card, add_checklist, add_checklist_item, etc.):
-1. The activity is correctly created in Wekan with the proper `userId` (IT-BOT)
+1. The activity is correctly created in Wekan with the proper `userId`
 2. However, Wekan's frontend displays the name of whoever is currently viewing the board
 3. This is a Wekan v7.60 bug in `ReactiveCache.getUser()` used by `activity.user()` helper
 4. The bug manifests as:
-   - Steve views board → sees "Stephen Vasilow" in activity
-   - IT-BOT views board → sees "Wekan Bot" in activity
-   - Riley views board → sees "Riley" in activity
+   - Any user viewing the board sees their own name attached to all activity entries, regardless of which service account or user actually performed the action
 5. Email notifications show "undefined" because the user lookup failed entirely
 
 Workaround: This is a Wekan upstream bug. The MCP server works correctly - the data is stored with the correct userId. Only the frontend display is affected.
@@ -201,7 +213,7 @@ Workaround: This is a Wekan upstream bug. The MCP server works correctly - the d
 ## When Modifying server.py
 
 1. **Bump version on ANY code change** — See "Semantic Versioning" section above for rules.
-2. Update version in: `server.py`, `CLAUDE.md`, `PLAN.md`, `DEVLOG.md`
+2. Update version in: `server.py`, `CLAUDE.md` (and `PLAN.md`/`DEVLOG.md` if you maintain them locally)
 3. **Always use the HTTP helpers** (`_http_get`, `_http_post`, etc.) — never bare `requests`.
 4. **Always validate inputs** with `_validate_id()` or `_validate_nonempty()` before HTTP calls.
 5. **Always catch `HTTPError` and `ConnectionError`** explicitly, then `Exception` as fallback.

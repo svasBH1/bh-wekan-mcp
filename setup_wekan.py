@@ -47,7 +47,7 @@ def write_env(config_path, url, token, user_id):
 def interactive():
     """Prompt for credentials and write .env."""
     print("=== Wekan MCP Credential Capture ===\n")
-    url = input("Wekan URL (e.g., https://projects.blockhouse.com): ").strip()
+    url = input("Wekan URL (e.g., https://wekan.example.com): ").strip()
     if not url:
         print("Error: URL is required.")
         sys.exit(1)
