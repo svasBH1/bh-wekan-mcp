@@ -5,6 +5,12 @@ Wekan project boards via Model Context Protocol.
 
 ---
 
+## Prerequisites
+
+- **OS:** Linux
+
+---
+
 ## Quick Install
 
 ```bash
